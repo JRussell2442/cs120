@@ -19,25 +19,25 @@ A great resource for all your (current and future) graphing needs is the Python 
 
 
 def merge(arr1, arr2):
-    sortedArr = []
+    helperarr = []
 
     i = 0
     j = 0
     while i < len(arr1) or j < len(arr2):
         if i >= len(arr1):
-            sortedArr.append(arr2[j])
+            helperarr.append(arr2[j])
             j += 1
         elif j >= len(arr2):
-            sortedArr.append(arr1[i])
+            helperarr.append(arr1[i])
             i += 1
         elif arr1[i][0] <= arr2[j][0]:
-            sortedArr.append(arr1[i])
+            helperarr.append(arr1[i])
             i += 1
         else:
-            sortedArr.append(arr2[j])
+            helperarr.append(arr2[j])
             j += 1
 
-    return sortedArr
+    return helperarr
 
 def mergeSort(arr):
     if len(arr) < 2:
@@ -58,12 +58,12 @@ def countSort(univsize, arr):
     for elt in arr:
         universe[elt[0]].append(elt)
 
-    sortedArr = []
+    helperarr = []
     for lst in universe:
         for elt in lst:
-            sortedArr.append(elt)
+            helperarr.append(elt)
 
-    return sortedArr
+    return helperarr
 
 def BC(n, b, k):
     if b < 2:
@@ -78,4 +78,24 @@ def BC(n, b, k):
 
 def radixSort(univsize, base, arr):
     """TODO: Implement Radix Sort using BC and countSort"""
-    return [] 
+    k = math.ceil(math.log(univsize, base))
+    helperarr = []
+    for i in range(len(arr)):
+        helperarr.append([i, [arr[i][1]]])
+    for i in range(len(arr)):
+        helperarr[i][1].append(BC(arr[i][0], base, k))
+    for j in range(k):
+        for i in range(len(arr)):
+            helperarr[i][0] = helperarr[i][1][1][j]
+        helperarr = countSort(base, helperarr)
+    finalarr = []
+    for i in range(len(arr)):
+        ki = 0
+        for j in range(k):
+            ki += helperarr[i][1][1][j] * base**j
+        finalarr.append([ki, helperarr[i][1][0]])
+    
+    return finalarr
+
+testarr = [[10, "A"], [5, "B"], [100, "C"], [3, "D"], [16, "E"]]
+print(radixSort(101, 10, testarr))

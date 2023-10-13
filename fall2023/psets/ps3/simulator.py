@@ -32,7 +32,9 @@ def executeProgram(programArr, inputArr):
     programCounter = 0
     while programCounter < len(programArr):
         # Store the command and the list of operands.
+        # The operation/command we do is this variable at 0 (the ifs have been done for us anyway)
         cmd = programArr[programCounter][0]
+        # The first space is the index, the ones 1 and 2 are the inputs
         ops = programArr[programCounter][1:]
         
         # Assignment commands
@@ -44,36 +46,41 @@ def executeProgram(programArr, inputArr):
             memory[variableList[ops[0]]] = variableList[ops[1]]
         if cmd == "assign":
             # ['assign', i, j]: assign var_i to the value j
-            # TODO: Implement assign.
-            pass
+            #var_i is at position given by ops[0]
+            variableList[ops[0]] = ops[1]
             
         # Arithmetic commands
         if cmd == "+":
             # ['+', i, j, k]: compute (var_j + var_k) and store in var_i
-            # TODO: Implement addition.
-            pass
+            # Just add two vars, at indexes 1 and 2
+            variableList[ops[0]] = variableList[ops[1]] + variableList[ops[2]]
         if cmd == "-":
             # ['-', i, j, k]: compute max((var_j - var_k), 0) and store in var_i.
-            # TODO: Implement subtraction.
-            pass
+            variableList[ops[0]] = max(variableList[ops[1]] - variableList[ops[2]], 0)
         if cmd == "*":
             # ['*', i, j, k]: compute (var_j * var_k) and store in var_i.
-            # TODO: Implement multiplication.
-            pass
+            variableList[ops[0]] = variableList[ops[1]] * variableList[ops[2]]
         if cmd == "/":
             #  ['/', i, j, k]: compute (var_j // var_k) and store in var_i.
-            # Note that this is integer division. You should return an integer, not a float.
+            # Note that this is integer division. You should return an integer, not a float. (Floor division)
             # Remember division by 0 results in 0.
-            # TODO: Implement division.
-            pass
+            if variableList[ops[2]] == 0:
+                variableList[ops[0]] = 0
+            else:
+                variableList[ops[0]] = variableList[ops[1]] // variableList[ops[2]]
             
         # Control commands
         if cmd == "goto":
             # ['goto', i, j]: if var_i is equal to 0, go to line j
-            # TODO: Implement goto.
-            pass
+            if variableList[ops[0]] == 0:
+                # ops[1] is the j we want to go to
+                # So by going back to top of the loop, we now do the command at ops[1]
+                # (this effectively does that line of programArr)
+                programCounter = ops[1]
+                continue
         
         programCounter += 1
     
-    # Return the memory starting at output_ptr with length of output_len
-    return [memory[i] for i in range(variableList[1], variableList[1]+variableList[2])]
+    # Return the memory starting at output_ptr with a length of output_len
+    return [memory[i] for i in range(variableList[1], variableList[1] + variableList[2])]
+
