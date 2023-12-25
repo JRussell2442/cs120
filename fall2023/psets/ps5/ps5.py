@@ -119,6 +119,7 @@ def bfs_2_coloring(G, precolored_nodes=None):
     visited = set()
     G.reset_colors()
     preset_color = 2
+    queue = []
     if precolored_nodes is not None:
         for node in precolored_nodes:
             G.colors[node] = preset_color
@@ -126,13 +127,34 @@ def bfs_2_coloring(G, precolored_nodes=None):
 
         if len(precolored_nodes) == G.N:
             return G.colors
-    
-    # TODO: Complete this function by implementing two-coloring using the colors 0 and 1.
-    # If there is no valid coloring, reset all the colors to None using G.reset_colors()
-    
-    G.reset_colors()
-    return None
+        
+    # BFS
+    for n in range(G.N):
+        # Queue anything not already colored
+        if n not in visited:
+            queue.append(n)
+            visited.add(n)
+            # Start off by coloring the first node 0
+            G.colors[n] = 0
 
+        while len(queue) > 0:
+            # Pop FIFO
+            curr = queue.pop(0) 
+            # Get neighbors of current node (next layer BFS)
+            neighbors = G.edges[curr]
+            #print(curr, neighbors)
+            for neighbor in neighbors: 
+                # If the neighbor is uncolored, assign it the opposite color
+                # Every time we visit one of these neighbors, keep track of that
+                visited.add(neighbor)
+                if G.colors[neighbor] is None:
+                    G.colors[neighbor] = 1 - G.colors[curr]
+                    queue.append(neighbor)
+                # If neighbor and curr have same color, then we've failed
+                elif G.colors[neighbor] == G.colors[curr]:
+                    G.reset_colors()
+                    return None
+    return G.colors
 '''
     Part B: Implement is_independent_set.
 '''
@@ -140,8 +162,11 @@ def bfs_2_coloring(G, precolored_nodes=None):
 # Given an instance of the Graph class G and a subset of precolored nodes,
 # Checks if subset is an independent set in G 
 def is_independent_set(G, subset):
-    # TODO: Complete this function
-
+    # For each vertex, none of its neighbors can be in this subset.
+    for node in subset:
+        for neighbor in G.edges[node]:
+            if neighbor in subset:
+                return False
     return True
 
 '''
@@ -169,7 +194,16 @@ def is_independent_set(G, subset):
 # If no coloring is possible, resets all of G's colors to None and returns None.
 def iset_bfs_3_coloring(G):
     # TODO: Complete this function.
-
+    # We only need subsets at most size n / 3
+    for i in range(G.N // 3 + 1):
+        for combo in combinations(range(G.N), i):
+            combolist = list(combo)
+            # if subset is independent
+            if is_independent_set(G, combolist):
+                # run BFS 2 coloring on the graph except don't worry about the independent set we pass in
+                f_s = bfs_2_coloring(G, precolored_nodes=combolist)
+                if f_s is not None:
+                    return f_s
     G.reset_colors()
     return None
 

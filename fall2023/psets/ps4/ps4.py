@@ -29,14 +29,62 @@ i: an integer [0, n-1]
 returns: An key-value pair (Kj, Vj) such that Kj is an i’th smallest key.
 '''
 
+def partition(arr, pivot_index):
+    i = 0
+    arr[0], arr[pivot_index] = arr[pivot_index], arr[0]
+    for j in range(len(arr)-1):
+        if arr[j+1] < arr[0]:
+            arr[j+1], arr[i+1] = arr[i+1], arr[j+1]
+            i += 1
+    arr[0], arr[i] = arr[i], arr[0]
+    # Get the (pivot_index)th position in the array (as now everything is partitioned around that)
+    return i
 
 def QuickSelect(arr, i):
     # Your code here
+    # If only one thing, return it
+    if len(arr) == 1:
+        return arr[0]
+    else:
+        # Get random index, partition array around it
+        pivot_index = get_random_index(arr)
+        j = partition(arr, pivot_index)
+        # Check if our desired i is less or greater than our random index
+        if j == i:
+            return arr[j]
+        if j > i:
+            return QuickSelect(arr[:(j)], i)
+        elif j < i:
+            # Now we are looking for the index on the right half of the list, so we need to
+            # adjust by subtracting the length of the left half + 1.
+            i = i - j - 1
+            return QuickSelect(arr[(j + 1):], i)
 
-    # Feel free to use get_random_index(arr) or get_random_int(start_inclusive, end_inclusive)
-    # ... see the helper functions below
-    pass
-    return (0, -1)
+def Med3QuickSelect(arr, i):
+    # Your code here
+    # If only one thing, return it
+    if len(arr) == 1:
+        return arr[0]
+    else:
+        # Get random index, partition array around it
+        pivots = []
+        pivots.append(get_random_index(arr))
+        pivots.append(get_random_index(arr))
+        pivots.append(get_random_index(arr))
+        pivots.remove(max(pivots))
+        pivots.remove(min(pivots))
+        pivot_index = pivots[0]
+        j = partition(arr, pivot_index)
+        # Check if our desired i is less or greater than our random index
+        if j == i:
+            return arr[j]
+        if j > i:
+            return QuickSelect(arr[:(j)], i)
+        elif j < i:
+            # Now we are looking for the index on the right half of the list, so we need to
+            # adjust by subtracting the length of the left half + 1.
+            i = i - j - 1
+            return QuickSelect(arr[(j + 1):], i)
 
 
 '''
@@ -54,8 +102,12 @@ NOTE: This is different from the QuickSelect definition. This function takes in 
 def MergeSortSelect(arr, query_list):
     # Only call MergeSort once
     # ... MergeSort has already been implemented for you (see below)
-    pass
-    return [(0, -1)] * len(query_list)  # replace this line with your return
+    # Simply sort the array and then our outputs should be retrieved via indexing
+    arr = MergeSort(arr)
+    outputs = []
+    for query in query_list:
+        outputs.append(arr[query])
+    return outputs  # replace this line with your return
 
 
 ##################################
@@ -67,13 +119,13 @@ def MergeSortSelect(arr, query_list):
 
 def experiments():
     # Edit this parameter
-    k = [1, 1, 1, 1, 1]
+    k = [4, 5, 6, 7, 8]
 
     # Feel free to edit these initial parameters
 
     RUNS = 20  # Number of runs for each trial; more runs means better distributions approximation but longer experiment
-    HEIGHT = 1.5  # Height of a chart
-    WIDTH = 3   # Width of a chart
+    HEIGHT = 2  # Height of a chart
+    WIDTH = 2   # Width of a chart
     # Determines if subcharts share the same axis scale/limits
     # ... since the trails cover a wide range, sharing the same scale/limits can cause some lines to be too small.
     SAME_AXIS_SCALE = False
@@ -112,6 +164,20 @@ def experiments():
                 k_record.append(ki)
                 ms_record.append(seconds * 1000)  # Convert seconds to milliseconds
                 algorithm_record.append("QuickSelect")
+
+            # Median of 3
+            for _ in range(RUNS):
+                # Record Time Taken to Solve All Queries
+                start_time = time.time()
+                for q in queries:
+                    # Copy dataset just to be safe
+                    Med3QuickSelect(dataset_size_n.copy(), q)
+                seconds = time.time() - start_time
+                # Record this trial run
+                n_record.append(ni)
+                k_record.append(ki)
+                ms_record.append(seconds * 1000)  # Convert seconds to milliseconds
+                algorithm_record.append("Med3QuickSelect")
 
             # MergeSort Runs
             for _ in range(RUNS):

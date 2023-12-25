@@ -191,7 +191,17 @@ def sat_3_coloring(G):
     solver = Glucose3()
 
     # TODO: Add the clauses to the solver
-
+    # Now, we can do 3 possible colorings for every vertex
+    # For vertex v, coloring i  --> combo 3v + i
+    
+    for v in range(G.N):
+        # First condition
+        solver.add_clause([3*v + 1, 3*v + 2, 3*v + 3])
+        # Second condition. Go through every edge v is in
+        for u in G.edges[v]:
+           for i in range(3):
+                solver.add_clause([-(3*v + 1 + i), -(3*u + 1 + i)])
+    
     # Attempt to solve, return None if no solution possible
     if not solver.solve():
         G.reset_colors()
@@ -199,9 +209,14 @@ def sat_3_coloring(G):
 
     # Accesses the model in form [-v1, v2, -v3 ...], which denotes v1 = False, v2 = True, v3 = False, etc.
     solution = solver.get_model()
-
+    #print(solution)
+    for i in range(len(solution)):
+        if solution[i] > 0:
+            node = (solution[i] -1)// 3
+            color = (solution[i] -1)% 3
+            G.colors[node] = color
+        
     # TODO: If a solution is found, convert it into a coloring and update G.colors
-
     return G.colors
 
 # Feel free to add miscellaneous tests below!
